@@ -1,0 +1,21 @@
+<html><body>
+<script src='main-thread-atomics-wait.js'></script>
+<script>
+let sab = null;
+
+let worker = new Worker('test.js');
+sab = new Int32Array(new SharedArrayBuffer(16));
+worker.postMessage(sab);
+console.log('Delaying');
+setTimeout(() => {
+  console.log('Main: Waking Worker');
+  Atomics.store(sab, 0, 1);
+  Atomics.notify(sab, 0, 1);
+  console.log(`Main: Atomic wait, value: ${sab[0]}`);
+
+  Atomics.wait(sab, 0, 1, 5000);
+
+  console.log(`Main: Atomic wait finished, value: ${sab[0]}`);
+
+}, 1000);
+</script></body></html>
